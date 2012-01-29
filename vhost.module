@@ -1,0 +1,78 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function vhost_menu() {
+  $items['admin/config/vhost'] = array(
+    'title' => 'Vhost Config',
+    'description' => 'Manage Vhosts configurations.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('vhost_settings_form'),
+    'access arguments' => array('administer vhosts'),
+    'file' => 'vhost.admin.inc',
+  );
+  
+  $items['admin/vhost'] = array(
+    'title' => 'Vhost Manager',
+    'description' => 'Manage Vhost entries.',
+    'page callback' => 'vhost_view_objects',
+    'access arguments' => array('administer vhosts'),
+    'file' => 'vhost.admin.inc',
+  );
+  
+  $items['admin/vhost/add'] = array(
+    'title' => 'Add Object',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('vhost_object_form'),
+    'access arguments' => array('administer vhosts'),
+    'file' => 'vhost.admin.inc',
+    'type' => MENU_LOCAL_ACTION,
+  );
+  
+  $items['admin/vhost/edit/%vhost'] = array(
+    'title' => 'Edit Object',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('vhost_object_form', 3),
+    'access arguments' => array('administer vhosts'),
+    'file' => 'vhost.admin.inc',
+  );
+  
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function node_notes_permission() {
+  $perms = array(
+    'administer vhosts' => array(
+      'title' => 'Administer Vhosts',
+    ),
+  );
+
+  return $perms;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function vhost_theme() {
+  return array(
+    'vhost_view_objects' => array(
+      'variables' => array('object_list' => NULL),
+      'template' => 'vhost-view-objects',
+    )
+  );
+}
+
+/**
+ * Implements hook_load().
+ */
+function vhost_load($oid) {
+  $result = db_query("SELECT * FROM {vhost_objects} WHERE oid = :oid", array(':oid' => $oid));
+  
+  foreach ($result as $object) {
+    return $object;
+  }
+}

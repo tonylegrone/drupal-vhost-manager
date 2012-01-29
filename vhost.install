@@ -1,0 +1,55 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function vhost_schema() {
+  
+  $schema = array();
+  
+  $schema['vhost_objects'] = array(
+    'description' => 'Stores vhost object information.',
+    'fields' => array(
+      'oid' => array(
+        'description' => 'The primary indentifier of an object.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'created' => array(
+        'description' => 'The timestamp for when the object was created.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'modified' => array(
+        'description' => 'The timestamp for when object was posted.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'document_root' => array(
+        'description' => 'The DocumentRoot.',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'server_name' => array(
+        'description' => 'The ServerName.',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'server_alias' => array(
+        'description' => 'The ServerAlias. Multiple aliases are space separated.',
+        'type' => 'text',
+      ),
+    ),
+    'primary key' => array('oid'),
+    'unique keys' => array(
+      'server_name' => array('server_name')
+    ),
+  );
+  
+  return $schema;
+}

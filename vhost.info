@@ -1,0 +1,3 @@
+name = "Vhost Manager"
+description = "Manages VirtualHost entries on local machine."
+core = 7.x
