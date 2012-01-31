@@ -9,7 +9,7 @@ function vhost_view_objects() {
   
   $object_list = array();
   
-  $result = db_query("SELECT * FROM {vhost_objects} WHERE oid > 0");
+  $result = db_query("SELECT * FROM {vhost_objects} WHERE oid > 0 ORDER BY server_name");
   
   foreach ($result as $object) {
     $columns = array(
@@ -63,6 +63,21 @@ function vhost_settings_form() {
   return system_settings_form($form);
 }
 
+/**
+ * Validator for vhost_settings_form().
+ *
+ * @see vhost_settings_form().
+ */
+function vhost_settings_form_validate($form, &$form_state) {
+  if (substr($form_state['values']['vhost_document_root_prefix'], -1, 1) != '/') {
+    $form_state['values']['vhost_document_root_prefix'] .=  '/';
+  }
+  
+  if (substr($form_state['values']['vhost_sites_conf_path'], -1, 1) != '/') {
+    $form_state['values']['vhost_sites_conf_path'] .= '/';
+  }
+}
+
 
 /**
  * Form builder; Add/edit a virtual host.
@@ -94,7 +109,7 @@ function vhost_object_form($form, &$form_state, $object = NULL) {
   $form['vhost']['document_root'] = array(
     '#type' => 'textfield',
     '#title' => t('DocumentRoot'),
-    '#description' => t('Prefixed with: ') . variable_get('vhost_document_root_prefix') . '/',
+    '#description' => t('Prefixed with: ') . variable_get('vhost_document_root_prefix'),
     '#default_value' => $object->document_root,
     '#required' => TRUE,
   );
@@ -112,7 +127,6 @@ function vhost_object_form($form, &$form_state, $object = NULL) {
     '#title' => t('ServerAlias'),
     '#description' => t('Separate multiple values with spaces.'),
     '#default_value' => $object->server_alias,
-    '#required' => TRUE,
   );
   
   $form['submit'] = array(
@@ -159,6 +173,8 @@ function vhost_object_form_submit($form, &$form_state) {
       ->execute();
   }
   
+  vhost_create_vhost($object);
+  
   drupal_set_message(t('Vhost entry saved.'));
   drupal_goto('admin/vhost');
 }
@@ -167,6 +183,8 @@ function vhost_object_form_delete($form, $form_state) {
   db_delete('vhost_objects')
     ->condition('oid', $form_state['values']['oid'])
     ->execute();
+  
+  unlink(variable_get('vhost_sites_conf_path') . $form_state['values']['server_name'] . '.conf');
   
   drupal_set_message(t('VirtualHost deleted.'));
   
