@@ -114,8 +114,8 @@ function vhost_create_vhost($object) {
         drupal_set_message(t('Could not create log folder.'), 'error');
       }
     }
-    
-    exec("/usr/local/bin/httpd_graceful");
+    $restart_script = variable_get('vhost_restart_script_path');
+    exec($restart_script);
     drupal_set_message(t('Apache has been gracefully restarted.'));
     
   } else {

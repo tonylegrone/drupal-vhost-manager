@@ -48,22 +48,33 @@ function vhost_settings_form() {
   
   $form['http']['vhost_document_root_prefix'] = array(
     '#type' => 'textfield',
-    '#title' => t('The absolute filepath to the http docs'),
+    '#title' => t('DocmuentRoot Base Path'),
+    '#description' => t('The absolute filepath to the http docs.'),
     '#default_value' => variable_get('vhost_document_root_prefix', ''),
     '#required' => TRUE,
   );
   
   $form['http']['vhost_sites_conf_path'] = array(
     '#type' => 'textfield',
-    '#title' => t('The absolute path to the sites.d folder'),
+    '#title' => t('Sites.d Path'),
+    '#description' => t('The absolute path to the sites.d folder.'),
     '#default_value' => variable_get('vhost_sites_conf_path', ''),
     '#required' => TRUE,
   );
   
   $form['http']['vhost_log_path'] = array(
     '#type' => 'textfield',
-    '#title' => t('The absolute path to the custom logs folders'),
+    '#title' => t('Custom Logs Path'),
+    '#description' => t('The absolute path to the custom logs folders.'),
     '#default_value' => variable_get('vhost_log_path', ''),
+    '#required' => TRUE,
+  );
+  
+  $form['http']['vhost_restart_script_path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Restart Script File'),
+    '#description' => t('The absolute path to the custom script to gracefully restart apache.'),
+    '#default_value' => variable_get('vhost_restart_script_path', ''),
     '#required' => TRUE,
   );
   
@@ -86,6 +97,10 @@ function vhost_settings_form_validate($form, &$form_state) {
   
   if (substr($form_state['values']['vhost_log_path'], -1, 1) != '/') {
     $form_state['values']['vhost_log_path'] .= '/';
+  }
+  
+  if (substr($form_state['values']['vhost_restart_script_path'], -1, 1) == '/') {
+    $form_state['values']['vhost_restart_script_path'] = substr($form_state['values']['vhost_restart_script_path'], 0, -1);
   }
 }
 
