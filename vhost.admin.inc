@@ -70,12 +70,19 @@ function vhost_settings_form() {
     '#required' => TRUE,
   );
   
-  $form['http']['vhost_restart_script_path'] = array(
+  $form['http']['vhost_graceful_command'] = array(
     '#type' => 'textfield',
-    '#title' => t('Restart Script File'),
-    '#description' => t('The absolute path to the custom script to gracefully restart apache.'),
-    '#default_value' => variable_get('vhost_restart_script_path', ''),
+    '#title' => t('Apache Graceful Restart Command'),
+    '#description' => t('Never use a hard restart command because it will interrupt the script.'),
+    '#default_value' => variable_get('vhost_graceful_command', ''),
     '#required' => TRUE,
+  );
+  
+  $form['http']['vhost_use_sudo'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use sudo'),
+    '#description' => t('Tick if you need to run your command as sudo.'),
+    '#default_value' => variable_get('vhost_use_sudo', TRUE),
   );
   
   return system_settings_form($form);
@@ -97,10 +104,6 @@ function vhost_settings_form_validate($form, &$form_state) {
   
   if (substr($form_state['values']['vhost_log_path'], -1, 1) != '/') {
     $form_state['values']['vhost_log_path'] .= '/';
-  }
-  
-  if (substr($form_state['values']['vhost_restart_script_path'], -1, 1) == '/') {
-    $form_state['values']['vhost_restart_script_path'] = substr($form_state['values']['vhost_restart_script_path'], 0, -1);
   }
 }
 
@@ -155,6 +158,15 @@ function vhost_object_form($form, &$form_state, $object = NULL) {
     '#default_value' => $object->server_alias,
   );
   
+  if (variable_get('vhost_use_sudo')) {
+    $form['vhost']['sudo_password'] = array(
+      '#type' => 'password',
+      '#title' => t('Sudo Password'),
+      '#description' => t('Your password will not be recorded.'),
+      '#required' => TRUE,
+    );
+  }
+  
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
@@ -183,6 +195,8 @@ function vhost_object_form_submit($form, &$form_state) {
     'server_alias' => $form_state['values']['server_alias'],
   );
   
+  $sudo_password = NULL;
+  
   if (isset($form_state['values']['oid'])) {
     $object['oid'] = $form_state['values']['oid'];
     
@@ -199,7 +213,11 @@ function vhost_object_form_submit($form, &$form_state) {
       ->execute();
   }
   
-  vhost_create_vhost($object);
+  if ($form_state['values']['sudo_password']) {
+    $sudo_password = $form_state['values']['sudo_password'];
+  }
+  
+  vhost_create_vhost($object, $sudo_password);
   
   drupal_set_message(t('Vhost entry saved.'));
   drupal_goto('admin/vhost');

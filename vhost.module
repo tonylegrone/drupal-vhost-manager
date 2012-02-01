@@ -84,7 +84,7 @@ function vhost_load($oid) {
 /**
  * Creats the apache vhost conf file and gracefully restarts apache.
  */
-function vhost_create_vhost($object) {
+function vhost_create_vhost($object, $sudo_password = NULL) {
   $conf_file = variable_get('vhost_sites_conf_path') . $object['server_name'] . '.conf';
   $log_path = variable_get('vhost_log_path');
   
@@ -114,9 +114,27 @@ function vhost_create_vhost($object) {
         drupal_set_message(t('Could not create log folder.'), 'error');
       }
     }
-    $restart_script = variable_get('vhost_restart_script_path');
-    exec($restart_script);
-    drupal_set_message(t('Apache has been gracefully restarted.'));
+    
+    $graceful_command = variable_get('vhost_graceful_command');
+    
+    if ($sudo_password) {
+      $graceful_command = "echo $sudo_password | sudo -S $graceful_command";
+    }
+    
+    // Try to gracefully restart apache
+    exec($graceful_command, $output, $return);
+    
+    if ($return === 0) {
+      drupal_set_message(t('Apache has been gracefully restarted.'));
+    } else {
+      drupal_set_message(
+        t('Apache could not be restarted. Please check your sudo settings or your restart command at !config_link',
+          array(
+            '!config_link' => l(t('admin/config/vhost'), 'admin/config/vhost'))
+          ),
+        'error'
+      );
+    }
     
   } else {
     drupal_set_message(t('The file %conf_file is not writable.', array('%conf_file' => $conf_file), 'error'));
