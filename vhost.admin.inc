@@ -219,7 +219,6 @@ function vhost_object_form_submit($form, &$form_state) {
   
   vhost_create_vhost($object, $sudo_password);
   
-  drupal_set_message(t('Vhost entry saved.'));
   drupal_goto('admin/vhost');
 }
 
