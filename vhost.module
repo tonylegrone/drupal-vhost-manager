@@ -106,7 +106,6 @@ function vhost_create_vhost($object) {
       }
     }
     
-    
     // Create log folders
     if (!file_exists($log_path . $object['server_name'])) {
       if (mkdir($log_path . $object['server_name'])) {
@@ -116,11 +115,9 @@ function vhost_create_vhost($object) {
       }
     }
     
-    //Create a file to ask cron to restart apache.
-    touch('/tmp/RESTART_HTTP');
-    exec("/usr/local/bin/hg >> /dev/null &");
-    drupal_set_message(t('Apache will gracefully restart in a few seconds.'));
-  
+    exec("/usr/local/bin/httpd_graceful");
+    drupal_set_message(t('Apache has been gracefully restarted.'));
+    
   } else {
     drupal_set_message(t('The file %conf_file is not writable.', array('%conf_file' => $conf_file), 'error'));
   }
