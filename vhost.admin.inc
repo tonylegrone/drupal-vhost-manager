@@ -60,6 +60,13 @@ function vhost_settings_form() {
     '#required' => TRUE,
   );
   
+  $form['http']['vhost_log_path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('The absolute path to the custom logs folders'),
+    '#default_value' => variable_get('vhost_log_path', ''),
+    '#required' => TRUE,
+  );
+  
   return system_settings_form($form);
 }
 
@@ -75,6 +82,10 @@ function vhost_settings_form_validate($form, &$form_state) {
   
   if (substr($form_state['values']['vhost_sites_conf_path'], -1, 1) != '/') {
     $form_state['values']['vhost_sites_conf_path'] .= '/';
+  }
+  
+  if (substr($form_state['values']['vhost_log_path'], -1, 1) != '/') {
+    $form_state['values']['vhost_log_path'] .= '/';
   }
 }
 

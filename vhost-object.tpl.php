@@ -5,4 +5,6 @@
   
   <?php echo $object['server_alias'] ?>
   
+  ErrorLog "<?php echo variable_get('vhost_log_path') . $object['server_name'] ?>/error_log"
+  CustomLog "<?php echo variable_get('vhost_log_path') . $object['server_name'] ?>/access_log" common
 </VirtualHost>

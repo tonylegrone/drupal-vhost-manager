@@ -86,36 +86,51 @@ function vhost_load($oid) {
  */
 function vhost_create_vhost($object) {
   $conf_file = variable_get('vhost_sites_conf_path') . $object['server_name'] . '.conf';
+  $log_path = variable_get('vhost_log_path');
   
   $conf_template = theme('vhost_object', array('object' => $object));
   $document_root = variable_get('vhost_document_root_prefix') . $object['document_root'];
   
   if (file_put_contents($conf_file, $conf_template)) {
     
-    drupal_set_message('Success, wrote <pre>' . check_plain($conf_template) . '</pre> to file "' . $conf_file . '"');
+    // Not worried about this being translatable
+    drupal_set_message('Success, wrote <pre>' . check_plain($conf_template) . '</pre> to file "' . $conf_file . '".');
     
     // Create site folder
     if (!file_exists($document_root)) {
       // TODO: permissions aren't working
-      if(!mkdir($document_root, 0755)) {
-        drupal_set_message(t("Could not create $document_root"));
+      if(mkdir($document_root)) {
+        drupal_set_message('New folder created at %document_root.', array('%document_root' => $document_root));
       } else {
-        drupal_set_message('New folder created at ' . $document_root . '.');
+        drupal_set_message(t('Could not create %document_root.', array('%document_root' => $document_root)), 'error');
+      }
+    }
+    
+    
+    // Create log folders
+    if (!file_exists($log_path . $object['server_name'])) {
+      if (mkdir($log_path . $object['server_name'])) {
+        drupal_set_message(t('New log folder created for %server_name.', array('%server_name' => $object['server_name'])));
+      } else {
+        drupal_set_message(t('Could not create log folder.'), 'error');
       }
     }
     
     //Create a file to ask cron to restart apache.
     touch('/tmp/RESTART_HTTP');
-    drupal_set_message('Apache will gracefully restart in a few seconds.');
+    exec("/usr/local/bin/hg >> /dev/null &");
+    drupal_set_message(t('Apache will gracefully restart in a few seconds.'));
   
   } else {
-    drupal_set_message("The file $conf_file is not writable.");
+    drupal_set_message(t('The file %conf_file is not writable.', array('%conf_file' => $conf_file), 'error'));
   }
 }
 
 function template_preprocess_vhost_object(&$variables) {
   $variables['object']['document_root'] = variable_get('vhost_document_root_prefix') . $variables['object']['document_root'];
   
-  $aliases = explode(' ', $variables['object']['server_alias']);
-  $variables['object']['server_alias'] = 'ServerAlias ' . implode("\n  ServerAlias ", $aliases);
+  if ($variables['object']['server_alias']) {
+    $aliases = explode(' ', $variables['object']['server_alias']);
+    $variables['object']['server_alias'] = 'ServerAlias ' . implode("\n  ServerAlias ", $aliases);
+  }
 }
