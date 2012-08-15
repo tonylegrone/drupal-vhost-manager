@@ -152,9 +152,9 @@ function vhost_object_form($form, &$form_state, $object = NULL) {
   );
   
   $form['vhost']['server_alias'] = array(
-    '#type' => 'textfield',
+    '#type' => 'textarea',
     '#title' => t('ServerAlias'),
-    '#description' => t('Separate multiple values with spaces.'),
+    '#description' => t('One entry per line.'),
     '#default_value' => $object->server_alias,
   );
   
@@ -232,4 +232,108 @@ function vhost_object_form_delete($form, $form_state) {
   drupal_set_message(t('VirtualHost deleted.'));
   
   drupal_goto('admin/vhost');
+}
+
+function vhost_import_form() {
+  
+  $conf_files = array();
+  $vhost_path = variable_get('vhost_sites_conf_path');
+  if ($handle = opendir($vhost_path)) {
+    while (false !== ($entry = readdir($handle))) {
+
+      $file = variable_get('vhost_sites_conf_path') . '/' . $entry;
+      $file = file_get_contents($file);
+      $file_lines = explode("\n", $file);
+      $server_name   = NULL;
+
+      foreach ($file_lines as $line) {
+        if (strstr($line, 'ServerName')) {
+          $line  = trim($line);
+          $line  = explode(' ', $line);
+          $value = $line[1];
+          if (db_query('SELECT oid FROM {vhost_objects} WHERE server_name = :value', array(':value' => $value))->fetchAssoc()) {
+            continue 2;
+          }
+          continue;
+        }
+      }
+
+      if (substr($entry, 0, 1) != '.') {
+        $conf_files[$entry] = $entry;
+      }
+    }
+    closedir($handle);
+  }
+
+  natsort($conf_files);
+
+  $form['conf_files'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Untracked hosts'),
+    '#options' => $conf_files,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Importort Selections'),
+  );
+
+  return $form;
+}
+
+function vhost_import_form_submit($form, &$form_state) {
+  $conf_files = $form_state['input']['conf_files'];
+  $document_root_strlen = (strlen(variable_get('vhost_document_root_prefix')) + 1);
+  
+  foreach ($conf_files as $key => $value) {
+    if (!$value) continue;
+
+    $file = variable_get('vhost_sites_conf_path') . '/' . $key;
+    $file = file_get_contents($file);
+    $file_lines = explode("\n", $file);
+
+    $document_root = NULL;
+    $server_name   = NULL;
+    $server_alias  = array();
+
+    foreach ($file_lines as $line) {
+      $is_document_root = strstr($line, 'DocumentRoot');
+      $is_server_name   = strstr($line, 'ServerName');
+      $is_server_alias  = strstr($line, 'ServerAlias');
+      
+      if ($is_document_root || $is_server_name || $is_server_alias) {
+        $line  = trim($line);
+        $line  = explode(' ', $line);
+        $value = $line[1];
+
+        switch ($line[0]) {
+          case 'DocumentRoot':
+            $document_root = substr($value, $document_root_strlen, -1);
+            break;
+          case 'ServerName':
+            $server_name = $value;
+            break;
+          case 'ServerAlias':
+            $server_alias[] = $value;
+            break;
+        }
+      } else {
+        continue;
+      }
+    }
+
+    $object = array(
+      'created' => REQUEST_TIME,
+      'modified' => REQUEST_TIME,
+      'document_root' => $document_root,
+      'server_name' => $server_name,
+      'server_alias' => implode("\n", $server_alias),
+    );
+
+    db_insert('vhost_objects')
+      ->fields($object)
+      ->execute();
+
+    drupal_set_message(t('Successfully imported: !vhost', array('!vhost' => $key)));
+  }
 }

@@ -37,6 +37,14 @@ function vhost_menu() {
     'access arguments' => array('administer vhosts'),
     'file' => 'vhost.admin.inc',
   );
+
+  $items['admin/vhost/import'] = array(
+    'title' => 'Import Vhosts',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('vhost_import_form', 3),
+    'access arguments' => array('administer vhosts'),
+    'file' => 'vhost.admin.inc',
+  );
   
   return $items;
 }
@@ -101,6 +109,11 @@ function vhost_create_vhost($object, $sudo_password = NULL) {
       // TODO: permissions aren't working
       if(mkdir($document_root)) {
         drupal_set_message('New folder created at %document_root.', array('%document_root' => $document_root));
+        if(chown($document_root, 'tonylegrone')) {
+          drupal_set_message('Changed owner of %document_root.', array('%document_root' => $document_root));
+        } else {
+          drupal_set_message(t('Could not change owner of %document_root.', array('%document_root' => $document_root)), 'error');
+        }
       } else {
         drupal_set_message(t('Could not create %document_root.', array('%document_root' => $document_root)), 'error');
       }
@@ -118,12 +131,12 @@ function vhost_create_vhost($object, $sudo_password = NULL) {
     $graceful_command = variable_get('vhost_graceful_command');
     
     if ($sudo_password) {
-      $graceful_command = "echo $sudo_password | sudo -S $graceful_command";
+      $graceful_command = "echo \"$sudo_password\" | sudo -S $graceful_command";
     }
-    
+
     // Try to gracefully restart apache
     exec($graceful_command, $output, $return);
-    
+
     if ($return === 0) {
       drupal_set_message(t('Apache has been gracefully restarted.'));
     } else {
@@ -145,7 +158,7 @@ function template_preprocess_vhost_object(&$variables) {
   $variables['object']['document_root'] = variable_get('vhost_document_root_prefix') . $variables['object']['document_root'];
   
   if ($variables['object']['server_alias']) {
-    $aliases = explode(' ', $variables['object']['server_alias']);
+    $aliases = explode("\n", $variables['object']['server_alias']);
     $variables['object']['server_alias'] = 'ServerAlias ' . implode("\n  ServerAlias ", $aliases);
   }
 }
