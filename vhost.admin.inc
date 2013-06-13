@@ -13,7 +13,7 @@ function vhost_view_objects() {
   
   foreach ($result as $object) {
     $columns = array(
-      $object->server_name,
+      l($object->server_name, 'http://' . $object->server_name, array('attributes' => array('target' => '_blank'))),
       l(t('Edit'), 'admin/vhost/edit/' . $object->oid),
     );
     
