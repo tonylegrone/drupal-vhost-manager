@@ -213,7 +213,7 @@ function vhost_object_form_submit($form, &$form_state) {
       ->execute();
   }
   
-  if ($form_state['values']['sudo_password']) {
+  if (isset($form_state['values']['sudo_password'])) {
     $sudo_password = $form_state['values']['sudo_password'];
   }
   
