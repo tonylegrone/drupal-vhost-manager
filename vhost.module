@@ -12,7 +12,7 @@ function vhost_menu() {
     'access arguments' => array('administer vhosts'),
     'file' => 'vhost.admin.inc',
   );
-  
+
   $items['admin/vhost'] = array(
     'title' => 'Vhost Manager',
     'description' => 'Manage Vhost entries.',
@@ -20,7 +20,7 @@ function vhost_menu() {
     'access arguments' => array('administer vhosts'),
     'file' => 'vhost.admin.inc',
   );
-  
+
   $items['admin/vhost/add'] = array(
     'title' => 'Add Object',
     'page callback' => 'drupal_get_form',
@@ -29,7 +29,7 @@ function vhost_menu() {
     'file' => 'vhost.admin.inc',
     'type' => MENU_LOCAL_ACTION,
   );
-  
+
   $items['admin/vhost/edit/%vhost'] = array(
     'title' => 'Edit Object',
     'page callback' => 'drupal_get_form',
@@ -45,7 +45,7 @@ function vhost_menu() {
     'access arguments' => array('administer vhosts'),
     'file' => 'vhost.admin.inc',
   );
-  
+
   return $items;
 }
 
@@ -83,7 +83,7 @@ function vhost_theme() {
  */
 function vhost_load($oid) {
   $result = db_query("SELECT * FROM {vhost_objects} WHERE oid = :oid", array(':oid' => $oid));
-  
+
   foreach ($result as $object) {
     return $object;
   }
@@ -95,15 +95,15 @@ function vhost_load($oid) {
 function vhost_create_vhost($object, $sudo_password = NULL) {
   $conf_file = variable_get('vhost_sites_conf_path') . $object['server_name'] . '.conf';
   $log_path = variable_get('vhost_log_path');
-  
+
   $conf_template = theme('vhost_object', array('object' => $object));
   $document_root = variable_get('vhost_document_root_prefix') . $object['document_root'];
-  
+
   if (file_put_contents($conf_file, $conf_template)) {
-    
+
     // Not worried about this being translatable
     drupal_set_message('Success, wrote <pre>' . check_plain($conf_template) . '</pre> to file "' . $conf_file . '".');
-    
+
     // Create site folder
     if (!file_exists($document_root)) {
       // TODO: permissions aren't working
@@ -118,7 +118,7 @@ function vhost_create_vhost($object, $sudo_password = NULL) {
         drupal_set_message(t('Could not create %document_root.', array('%document_root' => $document_root)), 'error');
       }
     }
-    
+
     // Create log folders
     if (!file_exists($log_path . $object['server_name'])) {
       if (mkdir($log_path . $object['server_name'])) {
@@ -127,9 +127,9 @@ function vhost_create_vhost($object, $sudo_password = NULL) {
         drupal_set_message(t('Could not create log folder.'), 'error');
       }
     }
-    
+
     $graceful_command = variable_get('vhost_graceful_command');
-    
+
     if ($sudo_password) {
       $graceful_command = "echo \"$sudo_password\" | sudo -S $graceful_command";
     }
@@ -148,7 +148,7 @@ function vhost_create_vhost($object, $sudo_password = NULL) {
         'error'
       );
     }
-    
+
   } else {
     drupal_set_message(t('The file %conf_file is not writable.', array('%conf_file' => $conf_file), 'error'));
   }
@@ -156,7 +156,7 @@ function vhost_create_vhost($object, $sudo_password = NULL) {
 
 function template_preprocess_vhost_object(&$variables) {
   $variables['object']['document_root'] = variable_get('vhost_document_root_prefix') . $variables['object']['document_root'];
-  
+
   if ($variables['object']['server_alias']) {
     $aliases = explode("\n", $variables['object']['server_alias']);
     $variables['object']['server_alias'] = 'ServerAlias ' . implode("\n  ServerAlias ", $aliases);

@@ -4,9 +4,9 @@
  * Implements hook_schema().
  */
 function vhost_schema() {
-  
+
   $schema = array();
-  
+
   $schema['vhost_objects'] = array(
     'description' => 'Stores vhost object information.',
     'fields' => array(
@@ -50,6 +50,6 @@ function vhost_schema() {
       'server_name' => array('server_name')
     ),
   );
-  
+
   return $schema;
 }
