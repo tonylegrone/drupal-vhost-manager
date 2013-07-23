@@ -8,15 +8,45 @@ function vhost_view_objects() {
   drupal_set_title(t('Manage Vhost Objects'));
 
   $object_list = array();
+  $char_match = NULL;
 
   $result = db_query("SELECT * FROM {vhost_objects} WHERE oid > 0 ORDER BY server_name");
 
   foreach ($result as $object) {
+    $first_char = substr($object->server_name, 0, 1);
+    if (!ctype_alpha($first_char)) {
+      if (is_null($char_match)) {
+        $object_list[] = array(
+          'data' => array(
+            array(
+              'data' => '*',
+              'colspan' => 2,
+            ),
+          ),
+          'id' => 'group-*',
+          'class' => array('group'),
+        );
+      }
+    }
+    else if ($first_char != $char_match) {
+      $object_list[] = array(
+        'data' => array(
+          array(
+            'data' => '<h2>' . strtoupper($first_char) . '</h2>',
+            'colspan' => 2
+          ),
+        ),
+        'id' => 'group-' . $first_char,
+        'class' => array('group'),
+      );
+    }
+
+    $char_match = $first_char;
+
     $columns = array(
       l($object->server_name, 'http://' . $object->server_name, array('attributes' => array('target' => '_blank'))),
       l(t('Edit'), 'admin/vhost/edit/' . $object->oid),
     );
-
     $object_list[] = $columns;
   }
 
