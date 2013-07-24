@@ -5,7 +5,7 @@
  */
 function vhost_view_objects() {
   $output = '';
-  drupal_set_title(t('Manage Vhost Objects'));
+  drupal_set_title(t('Manage vhost objects'));
 
   $object_list = array();
   $char_match = NULL;

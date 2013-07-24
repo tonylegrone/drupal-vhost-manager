@@ -5,8 +5,8 @@
  */
 function vhost_menu() {
   $items['admin/config/vhost'] = array(
-    'title' => 'Vhost Config',
-    'description' => 'Manage Vhosts configurations.',
+    'title' => 'Vhost config',
+    'description' => 'Manage vhosts configurations.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('vhost_settings_form'),
     'access arguments' => array('administer vhosts'),
@@ -14,15 +14,15 @@ function vhost_menu() {
   );
 
   $items['admin/vhost'] = array(
-    'title' => 'Vhost Manager',
-    'description' => 'Manage Vhost entries.',
+    'title' => 'Vhost manager',
+    'description' => 'Manage vhost entries.',
     'page callback' => 'vhost_view_objects',
     'access arguments' => array('administer vhosts'),
     'file' => 'vhost.admin.inc',
   );
 
   $items['admin/vhost/add'] = array(
-    'title' => 'Add Object',
+    'title' => 'Add object',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('vhost_object_form'),
     'access arguments' => array('administer vhosts'),
@@ -31,7 +31,7 @@ function vhost_menu() {
   );
 
   $items['admin/vhost/edit/%vhost'] = array(
-    'title' => 'Edit Object',
+    'title' => 'Edit object',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('vhost_object_form', 3),
     'access arguments' => array('administer vhosts'),
@@ -39,7 +39,7 @@ function vhost_menu() {
   );
 
   $items['admin/vhost/import'] = array(
-    'title' => 'Import Vhosts',
+    'title' => 'Import vhosts',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('vhost_import_form', 3),
     'access arguments' => array('administer vhosts'),
