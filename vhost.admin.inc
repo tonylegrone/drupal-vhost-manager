@@ -9,6 +9,7 @@ function vhost_view_objects() {
 
   $object_list = array();
   $char_match = NULL;
+  $index_used = array();
 
   $result = db_query("SELECT * FROM {vhost_objects} WHERE oid > 0 ORDER BY server_name");
 
@@ -26,6 +27,9 @@ function vhost_view_objects() {
           'id' => 'group-*',
           'class' => array('group'),
         );
+
+        // Record the use of *.
+        $index_used[] = '*';
       }
     }
     else if ($first_char != $char_match) {
@@ -39,6 +43,9 @@ function vhost_view_objects() {
         'id' => 'group-' . $first_char,
         'class' => array('group'),
       );
+
+      // Record the use of $first_char.
+      $index_used[] = strtoupper($first_char);
     }
 
     $char_match = $first_char;
@@ -53,6 +60,27 @@ function vhost_view_objects() {
   $header = array(
     array('data' => t('ServerName')),
     array('data' => t('Operations')),
+  );
+
+  // Start the index with *.
+  $index = array('*');
+
+  // Loop in alpha characters a-z.
+  for ($i = 97; $i <= 122; $i++) {
+    $index[] = strtoupper(chr($i));
+  }
+
+  // Link used characters.
+  foreach ($index as $key => $value) {
+    if (in_array($value, $index_used)) {
+      $index[$key] = l($value, '', array('fragment' => 'group-' . strtolower($value)));
+    }
+  }
+
+  $index = implode(' | ', $index);
+
+  $build['vhost_index'] = array(
+    '#markup' => '<p>' . t('Index: ') . $index . '</p>',
   );
 
   $build['vhost_objects'] = array(
