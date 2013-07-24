@@ -7,6 +7,19 @@ function vhost_view_objects() {
   $output = '';
   drupal_set_title(t('Manage vhost objects'));
 
+  drupal_add_js('
+    (function ($){
+      $(document).ready(function(){
+        $("#vhost-index a").click(function(e) {
+          $("html, body").animate({
+            scrollTop: $($(this).attr("href").slice(1)).offset().top - 60
+          }, 1000);
+          e.preventDefault();
+        });
+      })
+    })(jQuery);
+  ', 'inline');
+
   $object_list = array();
   $char_match = NULL;
   $index_used = array();
@@ -80,7 +93,7 @@ function vhost_view_objects() {
   $index = implode(' | ', $index);
 
   $build['vhost_index'] = array(
-    '#markup' => '<p>' . t('Index: ') . $index . '</p>',
+    '#markup' => '<p id="vhost-index">' . t('Index: ') . $index . '</p>',
   );
 
   $build['vhost_objects'] = array(
