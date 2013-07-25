@@ -23,10 +23,12 @@ function vhost_view_objects() {
   $object_list = array();
   $char_match = NULL;
   $index_used = array();
+  $count = 0;
 
   $result = db_query("SELECT * FROM {vhost_objects} WHERE oid > 0 ORDER BY server_name");
 
   foreach ($result as $object) {
+    $count++;
     $first_char = substr($object->server_name, 0, 1);
     if (!ctype_alpha($first_char)) {
       if (is_null($char_match)) {
@@ -94,6 +96,10 @@ function vhost_view_objects() {
 
   $build['vhost_index'] = array(
     '#markup' => '<p id="vhost-index">' . t('Index: ') . $index . '</p>',
+  );
+
+  $build['vhost_count'] = array(
+    '#markup' => '<p><strong>' . format_plural($count, '@count Domain', '@count Domains') . '</strong></p>',
   );
 
   $build['vhost_objects'] = array(
