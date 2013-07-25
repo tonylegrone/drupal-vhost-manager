@@ -141,21 +141,6 @@ function vhost_settings_form() {
     '#required' => TRUE,
   );
 
-  $form['http']['vhost_graceful_command'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Apache Graceful Restart Command'),
-    '#description' => t('Never use a hard restart command because it will interrupt the script.'),
-    '#default_value' => variable_get('vhost_graceful_command', ''),
-    '#required' => TRUE,
-  );
-
-  $form['http']['vhost_use_sudo'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Use sudo'),
-    '#description' => t('Tick if you need to run your command as sudo.'),
-    '#default_value' => variable_get('vhost_use_sudo', TRUE),
-  );
-
   return system_settings_form($form);
 }
 
@@ -228,15 +213,6 @@ function vhost_object_form($form, &$form_state, $object = NULL) {
     '#description' => t('One entry per line.'),
     '#default_value' => $object->server_alias,
   );
-
-  if (variable_get('vhost_use_sudo')) {
-    $form['vhost']['sudo_password'] = array(
-      '#type' => 'password',
-      '#title' => t('Sudo Password'),
-      '#description' => t('Your password will not be recorded.'),
-      '#required' => TRUE,
-    );
-  }
 
   $form['submit'] = array(
     '#type' => 'submit',

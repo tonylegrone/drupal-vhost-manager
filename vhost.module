@@ -128,26 +128,7 @@ function vhost_create_vhost($object, $sudo_password = NULL) {
       }
     }
 
-    $graceful_command = variable_get('vhost_graceful_command');
-
-    if ($sudo_password) {
-      $graceful_command = "echo \"$sudo_password\" | sudo -S $graceful_command";
-    }
-
-    // Try to gracefully restart apache
-    exec($graceful_command, $output, $return);
-
-    if ($return === 0) {
-      drupal_set_message(t('Apache has been gracefully restarted.'));
-    } else {
-      drupal_set_message(
-        t('Apache could not be restarted. Please check your sudo settings or your restart command at !config_link',
-          array(
-            '!config_link' => l(t('admin/config/vhost'), 'admin/config/vhost'))
-          ),
-        'error'
-      );
-    }
+    drupal_set_message(t('Don\'t forget to restart Apache!'), 'warning');
 
   } else {
     drupal_set_message(t('The file %conf_file is not writable.', array('%conf_file' => $conf_file), 'error'));
