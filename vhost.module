@@ -46,6 +46,13 @@ function vhost_menu() {
     'file' => 'vhost.admin.inc',
   );
 
+  $items['admin/vhost/autocomplete'] = array(
+    'title' => 'Vhost autocomplete',
+    'page callback' => 'vhost_autocomplete',
+    'access arguments' => array('administer vhosts'),
+    'type' => MENU_CALLBACK,
+  );
+
   return $items;
 }
 
@@ -142,4 +149,44 @@ function template_preprocess_vhost_object(&$variables) {
     $aliases = explode("\n", $variables['object']['server_alias']);
     $variables['object']['server_alias'] = 'ServerAlias ' . implode("\n  ServerAlias ", $aliases);
   }
+}
+
+/**
+ * Menu callback: autocomplete data for documentRoot field.
+ */
+function vhost_autocomplete($string = '') {
+  $matched = array();
+
+  if ($string) {
+    $path = variable_get('vhost_document_root_prefix');
+    $folders = scandir($path);
+    foreach ($folders as $folder) {
+      if (is_dir($path . $folder) == FALSE) continue;
+
+      if (strpos($folder, $string) !== FALSE) {
+        if (vhost_folder_in_use($folder)) {
+          $matches[$folder] = '<em style="color: #bbb;">' . $folder . '</em>';
+        }
+        else {
+          $matches[$folder] = $folder;
+        }
+      }
+    }
+  }
+
+  // Limit results to 15.
+  $matches = array_slice($matches, 0, 15);
+  return drupal_json_output($matches);
+}
+
+/**
+ * Determines if a documentRoot folder is in use by an existing vhost object.
+ */
+function vhost_folder_in_use($folder) {
+  return (bool) db_query('SELECT count(oid)
+    FROM {vhost_objects}
+    WHERE document_root = :folder',
+    array(
+      ':folder' => $folder,
+    ))->fetchField();
 }

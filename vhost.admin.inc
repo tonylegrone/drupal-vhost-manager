@@ -202,6 +202,7 @@ function vhost_object_form($form, &$form_state, $object = NULL) {
     '#title' => t('DocumentRoot'),
     '#description' => t('Prefixed with: ') . variable_get('vhost_document_root_prefix'),
     '#default_value' => $object->document_root,
+    '#autocomplete_path' => 'admin/vhost/autocomplete',
     '#required' => TRUE,
   );
 
