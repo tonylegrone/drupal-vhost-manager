@@ -97,7 +97,7 @@ function vhost_load($oid) {
 }
 
 /**
- * Creats the apache vhost conf file and gracefully restarts apache.
+ * Creates the apache vhost conf file and gracefully restarts apache.
  */
 function vhost_create_vhost($object, $sudo_password = NULL) {
   $conf_file = variable_get('vhost_sites_conf_path') . $object['server_name'] . '.conf';
@@ -138,7 +138,7 @@ function vhost_create_vhost($object, $sudo_password = NULL) {
     drupal_set_message(t('Don\'t forget to restart Apache!'), 'warning');
 
   } else {
-    drupal_set_message(t('The file %conf_file is not writable.', array('%conf_file' => $conf_file), 'error'));
+    drupal_set_message(t('The file %conf_file is not writable.', array('%conf_file' => $conf_file)), 'error');
   }
 }
 
