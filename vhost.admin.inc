@@ -36,7 +36,7 @@ function vhost_view_objects() {
           'data' => array(
             array(
               'data' => '*',
-              'colspan' => 2,
+              'colspan' => 3,
             ),
           ),
           'id' => 'group-*',
@@ -52,7 +52,7 @@ function vhost_view_objects() {
         'data' => array(
           array(
             'data' => '<h2>' . strtoupper($first_char) . '</h2>',
-            'colspan' => 2
+            'colspan' => 3,
           ),
         ),
         'id' => 'group-' . $first_char,
@@ -67,6 +67,7 @@ function vhost_view_objects() {
 
     $columns = array(
       l($object->server_name, 'http://' . $object->server_name, array('attributes' => array('target' => '_blank'))),
+      variable_get('vhost_document_root_prefix') . $object->document_root,
       l(t('Edit'), 'admin/vhost/edit/' . $object->oid),
     );
     $object_list[] = $columns;
@@ -74,6 +75,7 @@ function vhost_view_objects() {
 
   $header = array(
     array('data' => t('ServerName')),
+    array('data' => t('documentRoot')),
     array('data' => t('Operations')),
   );
 
