@@ -1,5 +1,5 @@
 
-<VirtualHost *:80>
+<VirtualHost *:<?php echo variable_get('vhost_port', '80'); ?>>
   DocumentRoot "<?php echo $object['document_root'] ?>"
   ServerName <?php echo $object['server_name'] ?>
 

@@ -125,6 +125,14 @@ function vhost_settings_form() {
     '#title' => t('Server Settings'),
   );
 
+  $form['http']['vhost_port'] = array(
+    '#type' => 'textfield',
+    '#title' => t('VirtualHost port'),
+    '#description' => t('The port to listen for HTTP requests on.'),
+    '#default_value' => variable_get('vhost_port', '80'),
+    '#required' => TRUE,
+  );
+
   $form['http']['vhost_document_root_prefix'] = array(
     '#type' => 'textfield',
     '#title' => t('DocmuentRoot Base Path'),
