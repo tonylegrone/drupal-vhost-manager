@@ -20,6 +20,10 @@ function vhost_view_objects() {
     })(jQuery);
   ', 'inline');
 
+  $css  = '#vhost-index span { display: inline-block; padding: 0 10px; border-right: 1px #999 solid; line-height: 1; }';
+  $css .= '#vhost-index span.empty { color: #bbb; }';
+  drupal_add_css($css, 'inline');
+
   $object_list = array();
   $char_match = NULL;
   $index_used = array();
@@ -90,11 +94,14 @@ function vhost_view_objects() {
   // Link used characters.
   foreach ($index as $key => $value) {
     if (in_array($value, $index_used)) {
-      $index[$key] = l($value, '', array('fragment' => 'group-' . strtolower($value)));
+      $index[$key] = l('<span>' . $value . '</span>', '', array('fragment' => 'group-' . strtolower($value), 'html' => TRUE));
+    }
+    else {
+      $index[$key] = '<span class="empty">' . $value . '</span>';
     }
   }
 
-  $index = implode(' | ', $index);
+  $index = implode('', $index);
 
   $build['vhost_index'] = array(
     '#markup' => '<p id="vhost-index">' . t('Index: ') . $index . '</p>',
