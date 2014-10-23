@@ -12,6 +12,5 @@
 <Directory "<?php echo $object['document_root']; ?>">
     Options Indexes FollowSymLinks
     AllowOverride All
-    Order allow,deny
-    Allow from all
+    Require all granted
 </Directory>
