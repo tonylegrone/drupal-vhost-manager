@@ -5,8 +5,10 @@
 
   <?php echo $object['server_alias'] ?>
 
-  ErrorLog "<?php echo variable_get('vhost_log_path') . $object['server_name'] ?>/error_log"
-  CustomLog "<?php echo variable_get('vhost_log_path') . $object['server_name'] ?>/access_log" common
+  <?php if (variable_get('vhost_custom_logs', FALSE)): ?>
+    ErrorLog "<?php echo variable_get('vhost_log_path') . $object['server_name'] ?>/error_log"
+    CustomLog "<?php echo variable_get('vhost_log_path') . $object['server_name'] ?>/access_log" common
+  <?php endif; ?>
 </VirtualHost>
 
 <Directory "<?php echo $object['document_root']; ?>">

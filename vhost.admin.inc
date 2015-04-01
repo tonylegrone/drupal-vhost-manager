@@ -156,12 +156,26 @@ function vhost_settings_form() {
     '#required' => TRUE,
   );
 
+  $form['http']['vhost_custom_logs'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use custom log path'),
+    '#description' => t('Use a custom log per host or use the global Apache logs'),
+    '#default_value' => variable_get('vhost_custom_logs', FALSE),
+  );
+
   $form['http']['vhost_log_path'] = array(
     '#type' => 'textfield',
     '#title' => t('Custom Logs Path'),
     '#description' => t('The absolute path to the custom logs folders.'),
     '#default_value' => variable_get('vhost_log_path', ''),
-    '#required' => TRUE,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="vhost_custom_logs"]' => array('checked' => TRUE),
+      ),
+      'required' => array(
+        ':input[name="vhost_custom_logs"]' => array('checked' => TRUE),
+      ),
+    ),
   );
 
   return system_settings_form($form);
@@ -181,7 +195,7 @@ function vhost_settings_form_validate($form, &$form_state) {
     $form_state['values']['vhost_sites_conf_path'] .= '/';
   }
 
-  if (substr($form_state['values']['vhost_log_path'], -1, 1) != '/') {
+  if (!empty($form_state['values']['vhost_log_path']) && substr($form_state['values']['vhost_log_path'], -1, 1) != '/') {
     $form_state['values']['vhost_log_path'] .= '/';
   }
 }
