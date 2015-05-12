@@ -101,7 +101,8 @@ function vhost_load($oid) {
  */
 function vhost_create_vhost($object, $sudo_password = NULL) {
   $conf_file = variable_get('vhost_sites_conf_path') . $object['server_name'] . '.conf';
-  $log_path = variable_get('vhost_log_path');
+  $use_custom_logs = variable_get('vhost_custom_logs', FALSE);
+  $log_path = variable_get('vhost_log_path', NULL);
 
   $conf_template = theme('vhost_object', array('object' => $object));
   $document_root = variable_get('vhost_document_root_prefix') . $object['document_root'];
@@ -127,7 +128,7 @@ function vhost_create_vhost($object, $sudo_password = NULL) {
     }
 
     // Create log folders
-    if (!file_exists($log_path . $object['server_name'])) {
+    if ($use_custom_logs && !file_exists($log_path . $object['server_name'])) {
       if (mkdir($log_path . $object['server_name'])) {
         drupal_set_message(t('New log folder created for %server_name.', array('%server_name' => $object['server_name'])));
       } else {
