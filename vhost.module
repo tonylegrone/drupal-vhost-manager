@@ -114,10 +114,11 @@ function vhost_create_vhost($object, $sudo_password = NULL) {
 
     // Create site folder
     if (!file_exists($document_root)) {
-      // TODO: permissions aren't working
+      // Permissions aren't working here. Need to figure out how to allow
+      // apache to change the owner of the folders it creates.
       if(mkdir($document_root)) {
         drupal_set_message('New folder created at %document_root.', array('%document_root' => $document_root));
-        if(chown($document_root, 'tonylegrone')) {
+        if(chown($document_root, variable_get('vhost_fs_user', exec('whoami')))) {
           drupal_set_message('Changed owner of %document_root.', array('%document_root' => $document_root));
         } else {
           drupal_set_message(t('Could not change owner of %document_root.', array('%document_root' => $document_root)), 'error');

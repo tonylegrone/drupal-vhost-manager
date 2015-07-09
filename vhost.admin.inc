@@ -178,6 +178,13 @@ function vhost_settings_form() {
     ),
   );
 
+  $form['http']['vhost_fs_user'] = array(
+    '#type' => 'textfield',
+    '#title' => t('File system user'),
+    '#description' => t('Change this if you want to change the folder owner to someone other than apache.'),
+    '#default_value' => variable_get('vhost_fs_user', exec('whoami')),
+  );
+
   return system_settings_form($form);
 }
 
