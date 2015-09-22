@@ -140,6 +140,26 @@ function vhost_settings_form() {
     '#required' => TRUE,
   );
 
+  $form['http']['vhost_ssl_port'] = array(
+    '#type' => 'textfield',
+    '#title' => t('VirtualHost SSL port'),
+    '#description' => t('The port to listen for HTTPS requests on.'),
+    '#default_value' => variable_get('vhost_ssl_port', '443'),
+    '#required' => TRUE,
+  );
+
+  $form['http']['vhost_ssl_cert_path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('SSLCertificateFile path'),
+    '#default_value' => variable_get('vhost_ssl_cert_path', ''),
+  );
+
+  $form['http']['vhost_ssl_key_path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('SSLCertificateKeyFile path'),
+    '#default_value' => variable_get('vhost_ssl_key_path', ''),
+  );
+
   $form['http']['vhost_document_root_prefix'] = array(
     '#type' => 'textfield',
     '#title' => t('DocmuentRoot Base Path'),
@@ -216,6 +236,9 @@ function vhost_settings_form_validate($form, &$form_state) {
 function vhost_object_form($form, &$form_state, $object = NULL) {
   if (!$object) {
     $object = new stdClass;
+    $object->support_ssl = FALSE;
+    $object->ssl_cert_path = '';
+    $object->ssl_key_path = '';
     $object->document_root = '';
     $object->server_name = '';
     $object->server_alias = '';
@@ -233,6 +256,36 @@ function vhost_object_form($form, &$form_state, $object = NULL) {
   $form['vhost'] = array(
     '#type' => 'fieldset',
     '#title' => t('VirtualHost Settings'),
+  );
+
+  $form['vhost']['support_ssl'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Support SSL'),
+    '#default_value' => $object->support_ssl,
+  );
+
+  $form['vhost']['ssl_cert_path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('SSL certificate path'),
+    '#description' => t('Uses default varibale vhost_ssl_cert_path if not provided.'),
+    '#default_value' => $object->ssl_cert_path,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="support_ssl"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+
+  $form['vhost']['ssl_key_path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('SSL key path'),
+    '#description' => t('Uses default varibale vhost_ssl_key_path if not provided.'),
+    '#default_value' => $object->ssl_key_path,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="support_ssl"]' => array('checked' => TRUE),
+      ),
+    ),
   );
 
   $form['vhost']['document_root'] = array(
@@ -279,18 +332,23 @@ function vhost_object_form($form, &$form_state, $object = NULL) {
  * Saves a vhost object to the database.
  */
 function vhost_object_form_submit($form, &$form_state) {
+  $values = $form_state['values'];
+
   $object = array(
     'created' => REQUEST_TIME,
     'modified' => REQUEST_TIME,
-    'document_root' => $form_state['values']['document_root'],
-    'server_name' => $form_state['values']['server_name'],
-    'server_alias' => $form_state['values']['server_alias'],
+    'support_ssl' => $values['support_ssl'],
+    'ssl_cert_path' => $values['ssl_cert_path'],
+    'ssl_key_path' => $values['ssl_key_path'],
+    'document_root' => $values['document_root'],
+    'server_name' => $values['server_name'],
+    'server_alias' => $values['server_alias'],
   );
 
   $sudo_password = NULL;
 
-  if (isset($form_state['values']['oid'])) {
-    $object['oid'] = $form_state['values']['oid'];
+  if (isset($values['oid'])) {
+    $object['oid'] = $values['oid'];
 
     // don't alter the created date.
     unset($object['created']);
@@ -305,8 +363,8 @@ function vhost_object_form_submit($form, &$form_state) {
       ->execute();
   }
 
-  if (isset($form_state['values']['sudo_password'])) {
-    $sudo_password = $form_state['values']['sudo_password'];
+  if (isset($values['sudo_password'])) {
+    $sudo_password = $values['sudo_password'];
   }
 
   vhost_create_vhost($object, $sudo_password);

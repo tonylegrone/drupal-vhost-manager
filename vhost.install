@@ -44,6 +44,23 @@ function vhost_schema() {
         'description' => 'The ServerAlias. Multiple aliases are space separated.',
         'type' => 'text',
       ),
+      'support_ssl' => array(
+        'description' => 'Boolean indicating whether vhost supports SSL.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'ssl_cert_path' => array(
+        'description' => 'The SSLCertificateFile path.',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'ssl_key_path' => array(
+        'description' => 'The SSLCertificateKeyFile path.',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
     ),
     'primary key' => array('oid'),
     'unique keys' => array(
@@ -52,4 +69,29 @@ function vhost_schema() {
   );
 
   return $schema;
+}
+
+/**
+ * Add SSL support columns.
+ */
+function vhost_update_7101() {
+  db_add_field('vhost_objects', 'support_ssl', array(
+    'description' => 'Boolean indicating whether vhost supports SSL.',
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'not null' => TRUE,
+    'default' => 0,
+  ));
+
+  db_add_field('vhost_objects', 'ssl_cert_path', array(
+    'description' => 'The SSLCertificateFile path.',
+    'type' => 'varchar',
+    'length' => 255,
+  ));
+
+  db_add_field('vhost_objects', 'ssl_key_path', array(
+    'description' => 'The SSLCertificateKeyFile path.',
+    'type' => 'varchar',
+    'length' => 255,
+  ));
 }
