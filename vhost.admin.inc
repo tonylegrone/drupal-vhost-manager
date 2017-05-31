@@ -7,18 +7,20 @@ function vhost_view_objects() {
   $output = '';
   drupal_set_title(t('Manage vhost objects'));
 
-  drupal_add_js('
-    (function ($){
-      $(document).ready(function(){
-        $("#vhost-index a").click(function(e) {
-          $("html, body").animate({
-            scrollTop: $($(this).attr("href").slice(1)).offset().top - 60
-          }, 1000);
-          e.preventDefault();
-        });
-      })
-    })(jQuery);
-  ', 'inline');
+$js = <<<JAVASCRIPT
+(function ($){
+  $(document).ready(function(){
+    $("#vhost-index a").click(function(e) {
+      $("html, body").animate({
+        scrollTop: $($(this).attr("href").slice(1)).offset().top - 60
+      }, 1000);
+      e.preventDefault();
+    });
+  })
+})(jQuery);
+JAVASCRIPT;
+
+  drupal_add_js($js, 'inline');
 
   $css  = '#vhost-index span { display: inline-block; padding: 0 10px; border-right: 1px #999 solid; line-height: 1; }';
   $css .= '#vhost-index span.empty { color: #bbb; }';
