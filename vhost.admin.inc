@@ -71,9 +71,15 @@ JAVASCRIPT;
 
     $char_match = $first_char;
 
+    $document_root = variable_get('vhost_document_root_prefix') . $object->document_root;
+
+    if (!file_exists($document_root)) {
+      $document_root .= ' - <span class="error">MISSING!</span>';
+    }
+
     $columns = array(
       l($object->server_name, 'http://' . $object->server_name, array('attributes' => array('target' => '_blank'))),
-      variable_get('vhost_document_root_prefix') . $object->document_root,
+      $document_root,
       l(t('Edit'), 'admin/vhost/edit/' . $object->oid),
     );
     $object_list[] = $columns;
